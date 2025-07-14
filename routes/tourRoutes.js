@@ -6,9 +6,12 @@ import {
   createTour,
   updateTour,
   deleteTour,
+  aliasTopTours,
 } from '../controllers/tourController.js';
 
 const router = express.Router();
+
+router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
 router.route('/').get(getAllTours).post(createTour);
 
