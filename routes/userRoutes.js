@@ -6,13 +6,12 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/userController.js';
+import { signup, login } from '../controllers/authController.js';
 
 const router = express.Router();
 
-router.param('id', (req, res, next, val) => {
-  console.log(`User id : ${val} `);
-  next();
-});
+router.post('/signup', signup);
+router.post('/login', login);
 
 router.route('/').get(getAllUsers).post(createUser);
 
