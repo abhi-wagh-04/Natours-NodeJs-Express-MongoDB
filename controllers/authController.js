@@ -23,6 +23,12 @@ export const signup = catchAsync(async (req, res, next) => {
   });
 
   const token = signToken(newUser._id);
+  res.cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  });
   res.status(201).json({
     status: 'success',
     token,
@@ -48,6 +54,12 @@ export const login = catchAsync(async (req, res, next) => {
   }
   // If everything Okay send token to client
   const token = signToken(user._id);
+  res.cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  });
   res.status(200).json({
     status: 'success',
     token,
@@ -69,6 +81,7 @@ export const protect = catchAsync(async (req, res, next) => {
       new AppError('You are not Logged In, Please login to get access', 401)
     );
   }
+  console.log(token);
 
   // Verification Token --> Whenever we use the verify it only returs the payload part (whichwas id in our case)
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -164,6 +177,12 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   //Log the user in, send jwt
   const token = signToken(user._id);
+  res.cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  });
   res.status(200).json({
     status: 'success',
     token,
@@ -186,6 +205,12 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 
   //send JWT token for newly created password
   const token = signToken(user._id);
+  res.cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  });
   res.status(200).json({
     status: 'success',
     token,
