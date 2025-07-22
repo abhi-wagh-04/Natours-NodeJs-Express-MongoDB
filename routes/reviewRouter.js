@@ -11,15 +11,18 @@ import { protect, restrictTo } from '../controllers/authController.js';
 
 const router = express.Router({ mergeParams: true });
 
+// All routes below are protected by the following middleware
+router.use(protect);
+
 router
   .route('/')
   .get(getAllReviews)
-  .post(protect, restrictTo('user'), setTouUserIds, createReview);
+  .post(restrictTo('user'), setTouUserIds, createReview);
 
 router
   .route('/:id')
-  .get(protect, getReview)
-  .patch(protect, updateReview)
-  .delete(deleteReview);
+  .get(getReview)
+  .patch(restrictTo('user', 'admin'), updateReview)
+  .delete(restrictTo('user', 'admin'), deleteReview);
 
 export default router;

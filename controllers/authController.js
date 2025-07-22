@@ -13,14 +13,17 @@ const signToken = (id) => {
 };
 
 export const signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    role: req.body.role,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    // passwordChangedAt: req.body.passwordChangedAt,
-  });
+  const newUser = await User.create(
+    {
+      name: req.body.name,
+      role: req.body.role,
+      email: req.body.email,
+      password: req.body.password,
+      passwordConfirm: req.body.passwordConfirm,
+      // passwordChangedAt: req.body.passwordChangedAt,
+    },
+    { validateBeforeSave: false }
+  );
 
   const token = signToken(newUser._id);
   res.cookie('jwt', token, {
