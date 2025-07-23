@@ -69,6 +69,16 @@ export const login = catchAsync(async (req, res, next) => {
   });
 });
 
+export const logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: 'success',
+  });
+};
+
 export const protect = catchAsync(async (req, res, next) => {
   // Get Token and check if it exists
   let token;
@@ -77,8 +87,9 @@ export const protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
-
   if (!token) {
     return next(
       new AppError('You are not Logged In, Please login to get access', 401)
@@ -105,6 +116,36 @@ export const protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+// Only for rendered pages, no errors
+export const isLoggedIn = async (req, res, next) => {
+  try {
+    // Get Token and check if it exists
+    if (req.cookies.jwt) {
+      // Verification Token --> Whenever we use the verify it only returs the payload part (whichwas id in our case)
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) next();
+
+      // Check if the user changed password after the token was issued
+      if (await currentUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // There is a Logged in user
+      res.locals.user = currentUser;
+      return next();
+    }
+  } catch (err) {
+    return next();
+  }
+  next();
+};
 
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
