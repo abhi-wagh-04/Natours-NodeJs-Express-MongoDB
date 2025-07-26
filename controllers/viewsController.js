@@ -2,6 +2,7 @@ import Tour from '../models/tourModel.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import User from '../models/userModel.js';
+import Booking from '../models/bookingModel.js';
 
 export const getOverview = catchAsync(async (req, res, next) => {
   // 1) Get tour data from collection
@@ -64,5 +65,17 @@ export const updateUserData = catchAsync(async (req, res, next) => {
   res.status(200).render('account', {
     title: 'Your account',
     user: updatedUser,
+  });
+});
+
+export const getMyTours = catchAsync(async (req, res, next) => {
+  // We can perform virtual populate on user, but we chose to do it manually
+  const bookings = await Booking.find({ user: req.user.id });
+  const tourIDs = bookings.map((el) => el.tour);
+  const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+  res.status(200).render('overview', {
+    title: 'My Tours',
+    tours,
   });
 });
