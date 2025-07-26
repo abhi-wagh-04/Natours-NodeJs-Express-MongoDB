@@ -1,6 +1,7 @@
 import Tour from '../models/tourModel.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import User from '../models/userModel.js';
 
 export const getOverview = catchAsync(async (req, res, next) => {
   // 1) Get tour data from collection
@@ -38,3 +39,30 @@ export const getLoginForm = (req, res) => {
     title: 'Log into your account',
   });
 };
+
+export const getAccount = (req, res) => {
+  res.status(200).render('account', {
+    title: 'You account',
+  });
+};
+
+export const updateUserData = catchAsync(async (req, res, next) => {
+  console.log('✅ REQ.USER in updateUserData:', req.user); // This should log the user
+  console.log('📦 REQ.BODY:', req.body);
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).render('account', {
+    title: 'Your account',
+    user: updatedUser,
+  });
+});

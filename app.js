@@ -5,7 +5,9 @@ import morgan from 'morgan';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRouter.js';
+
 import viewRouter from './routes/viewRouter.js';
+import bookingRouter from './routes/bookingRoutes.js';
 import AppError from './utils/appError.js';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
@@ -28,11 +30,20 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
+        scriptSrc: [
+          "'self'",
+          'https://cdnjs.cloudflare.com',
+          'https://js.stripe.com',
+        ],
         connectSrc: [
           "'self'",
-          'ws://127.0.0.1:60422', // ✅ Allow WebSocket from this port
+          'ws://127.0.0.1:*',
+          'ws://localhost:*',
+          'https://js.stripe.com',
         ],
+        frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com'],
+        imgSrc: ["'self'", 'https://www.natours.dev'],
+        objectSrc: ["'none'"],
       },
     },
   })
@@ -51,6 +62,7 @@ app.use('/api', limiter);
 
 // middleware for accessing request body && payload limit
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // Data Sanitization against NoSQL query injection
@@ -78,6 +90,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 // Handling Unhandled Routes
 app.all('*', (req, res, next) => {

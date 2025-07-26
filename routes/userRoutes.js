@@ -1,4 +1,5 @@
 import express from 'express';
+
 import {
   getAllUsers,
   createUser,
@@ -8,6 +9,8 @@ import {
   updateMe,
   deleteMe,
   getMe,
+  uploadUserPhoto,
+  resizeUserPhoto,
 } from '../controllers/userController.js';
 import {
   signup,
@@ -33,7 +36,7 @@ router.patch('/resetPassword/:token', resetPassword);
 router.use(protect);
 
 router.patch('/updateMyPassword', updatePassword);
-router.patch('/updateMe', updateMe);
+router.patch('/updateMe', uploadUserPhoto, resizeUserPhoto, updateMe);
 router.delete('/deleteMe', deleteMe);
 
 // Only Protected and Admin can access below routes
